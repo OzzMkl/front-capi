@@ -1,0 +1,306 @@
+<p-toast></p-toast>
+<div class="container-fluid">
+    <h1 class="text-center mt-1">Mi Agenda</h1>
+  
+    <div class="mt-2">
+      <div class="row">
+        <div class="col">
+  
+            <p-dropdown 
+                [options]="optionsSelect"
+                [(ngModel)]="selectedOpt"
+                optionLabel="name"
+                [showClear]="true"
+                placeholder="Selecciona una opcion"
+                [style]="{ width: '30%' }"
+                (ngModelChange)="onSearch()"
+            ></p-dropdown>
+            <input type="text" pInputText [(ngModel)]="valSearch" [style]="{ width: '65%' }" (ngModelChange)="onSearch()">
+            <button pButton type="button" class="" [style]="{ width: '5%' }" icon="pi pi-plus" (click)="open_modal('Agregar')"></button>
+  
+        </div>
+      </div>
+  
+      <table class="table table-dark mt-1">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Telefonos</th>
+            <th>Emails</th>
+            <th>Direcciones</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody *ngFor="let contacto of contactos">
+          <tr (click)="selectedContact(contacto)">
+            <td>{{contacto.nombreCompleto}}</td>
+            <td>
+              <ul *ngFor="let tel of contacto.telefonos">
+                <li>{{tel.telefono}}</li>
+              </ul>
+            </td>
+            <td>
+              <ul *ngFor="let email of contacto.emails">
+                <li>{{email.email}}</li>
+              </ul>
+            </td>
+            <td>
+              <ul *ngFor="let dir of contacto.direcciones">
+                <li>{{dir.colonia}} {{dir.calle}} {{dir.numero}}</li>
+              </ul>
+            </td>
+            <td class="text-center">
+                <button pButton class="p-button-rounded p-button-text p-button-plain p-button-icon-mov" icon="pi pi-cog" (click)="menu.toggle($event)">
+                </button>
+                <p-menu #menu id="config_menu" [model]="menuItems" [popup]="true"></p-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p-paginator
+        (onPageChange)="onPageChange($event)"
+        [rows]="10" 
+        [totalRecords]="totalPages"
+      ></p-paginator>
+    </div>
+  </div>
+
+<p-dialog
+  header="Header"
+  [(visible)]="isViewModal"
+  [modal]="true"
+  [style]="{width:'70vw'}"
+  [draggable]="true"
+  [resizable]="true"
+  position="top"
+  [dismissableMask]="true"
+  (onHide)="getContacts()">
+  <ng-template pTemplate="header">
+      <h5 class="modal-title" id="modal-title">{{strModalTitle}} contacto</h5>
+  </ng-template>
+  <div class="card">
+    <form action="" [style]="{'background':'#2a323d'}">
+      <p-tabView styleClass="tabview-custom" >
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      icon="pi pi-user"
+                      shape="circle">
+                    </p-avatar>
+                    <span class="font-bold white-space-nowrap m-0">
+                        Principal
+                    </span>
+                </div>
+            </ng-template>
+            <div class="row">
+              <div class="col">
+                <label class="form-label" for="">Nombre(s)*</label>
+                <input class="form-control" type="text" id="nombre" name="nombre" #nombre="ngModel" 
+                        [(ngModel)]="contacto.nombre" [disabled]="strModalTitle == 'Detalles'"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="">Apellido Paterno*</label>
+                <input class="form-control" type="text" id="apellido_paterno" name="apellido_paterno" #apellido_paterno="ngModel" 
+                      [(ngModel)]="contacto.apellido_paterno" [disabled]="strModalTitle == 'Detalles'"
+                      oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="">Apellido Materno*</label>
+                <input class="form-control" type="text" id="apellido_materno" name="apellido_materno" #apellido_materno="ngModel" 
+                        [(ngModel)]="contacto.apellido_materno" [disabled]="strModalTitle == 'Detalles'"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="">Fecha de nac.</label>
+                <input class="form-control" type="date" id="fecha_nacimiento" name="fecha_nacimiento" #fecha_nacimiento="ngModel" 
+                        [(ngModel)]="contacto.fecha_nacimiento" [disabled]="strModalTitle == 'Detalles'" autocomplete="off">
+              </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Header II">
+            <ng-template pTemplate="header">
+                <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      icon="pi pi-phone"
+                      shape="circle">
+                    </p-avatar>
+                    <span class="font-bold white-space-nowrap m-0">
+                        Telefono
+                    </span>
+                </div>
+            </ng-template>
+            <div>
+              <div class="row" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+                <div class="col-3">
+                  <label class="form-label" for="">Telefono</label>
+                  <div class="input-group mb-3" >
+                    <input type="text" class="form-control" id="inputTelefono" [(ngModel)]="nuevoTelefono"  [ngModelOptions]="{standalone: true}"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');" autocomplete="off" maxlength="10">
+                    <button pButton type="button" class="" icon="pi pi-plus" (click)="add_item_toArrayContact('telefono')"></button>
+                  </div>
+                </div>
+              </div>
+              <table class="table table-sm table-dark mt-2">
+                <thead>
+                  <tr>
+                    <th>Telefono</th>
+                    <th [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''" >Acction</th>
+                  </tr>
+                </thead>
+                <tbody *ngFor="let tel of contacto.telefonos">
+                  <tr>
+                    <td>{{tel.telefono}}</td>
+                    <td [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+                      <button pButton class="p-button-rounded p-button-text p-button-plain p-button-icon-mov" 
+                            icon="pi pi-trash" 
+                            (click)="delete_item_toArrayContact('telefono',tel)">
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Header III">
+            <ng-template pTemplate="header">
+                <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      icon="pi pi-envelope"
+                      shape="circle">
+                    </p-avatar>
+                    <span class="font-bold white-space-nowrap m-0">
+                        Correo
+                    </span>
+                </div>
+            </ng-template>
+            <div>
+              <div class="row" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+                <div class="col-6">
+                  <label class="form-label" for="">Email</label>
+                  <div class="input-group mb-3" >
+                    <input type="text" class="form-control" id="inputEmail" [(ngModel)]="nuevoEmail"  [ngModelOptions]="{standalone: true}"
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" autocomplete="off" maxlength="100">
+                    <button pButton type="button" class="" icon="pi pi-plus" (click)="add_item_toArrayContact('email')"></button>
+                  </div>
+                </div>
+              </div>
+              <table class="table table-sm table-dark mt-2">
+                <thead>
+                  <tr>
+                    <th>Emails</th>
+                    <th [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''" >Acction</th>
+                  </tr>
+                </thead>
+                <tbody *ngFor="let email of contacto.emails">
+                  <tr>
+                    <td>{{email.email}}</td>
+                    <td [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+                      <button pButton class="p-button-rounded p-button-text p-button-plain p-button-icon-mov" 
+                            icon="pi pi-trash" 
+                            (click)="delete_item_toArrayContact('email',email)">
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Header IV">
+          <ng-template pTemplate="header">
+              <div class="flex align-items-center gap-2">
+                  <p-avatar
+                    icon="pi pi-address-book"
+                    shape="circle">
+                  </p-avatar>
+                  <span class="font-bold white-space-nowrap m-0">
+                      Direccion
+                  </span>
+              </div>
+          </ng-template>
+          <div>
+            <div class="row" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+              <div class="col">
+                <label class="form-label" for="estado">Estado</label>
+                <input class="form-control" type="text" name="estado" id="estado" #estado="ngModel" 
+                        [(ngModel)]="direccion.estado" [disabled]="strModalTitle == 'Detalles'" maxlength="100"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="ciudad">Ciudad</label>
+                <input class="form-control" type="text" name="ciudad" id="ciudad" #ciudad="ngModel" 
+                        [(ngModel)]="direccion.ciudad" [disabled]="strModalTitle == 'Detalles'" maxlength="100"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="colonia">Colonia*</label>
+                <input class="form-control" type="text" name="colonia" id="colonia" #colonia="ngModel" 
+                        [(ngModel)]="direccion.colonia" [disabled]="strModalTitle == 'Detalles'" maxlength="100"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+            </div>
+            <div class="row" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+              <div class="col">
+                <label class="form-label" for="calle">Calle*</label>
+                <input class="form-control" type="text" name="calle" id="calle" #calle="ngModel" 
+                        [(ngModel)]="direccion.calle" [disabled]="strModalTitle == 'Detalles'" maxlength="100"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="numero">Numero*</label>
+                <input class="form-control" type="text" name="numero" id="numero" #numero="ngModel" 
+                        [(ngModel)]="direccion.numero" [disabled]="strModalTitle == 'Detalles'" maxlength="100"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '');" autocomplete="off">
+              </div>
+              <div class="col">
+                <label class="form-label" for="codigo_postal">Codigo Postal</label>
+                <input class="form-control" type="text" name="codigo_postal" id="codigo_postal" #codigo_postal="ngModel" 
+                        [(ngModel)]="direccion.codigo_postal" [disabled]="strModalTitle == 'Detalles'" maxlength="5"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');" autocomplete="off">
+              </div>
+            </div>
+            <div class="row" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+              <div class="col mt-2">
+                <button pButton type="button" [style]="{ width: '100%' }" icon="pi pi-plus" label="Agregar direccion"
+                        (click)="add_item_toArrayContact('direccion')">
+                </button>
+              </div>
+            </div>
+            <table class="table table-sm table-dark mt-2">
+              <thead>
+                <tr>
+                  <th>Direcciones</th>
+                  <th [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''" >Acction</th>
+                </tr>
+              </thead>
+              <tbody *ngFor="let dir of contacto.direcciones">
+                <tr>
+                  <td>{{dir.estado+' '+dir.ciudad+' '+dir.colonia+' '+dir.calle+' '+dir.numero}}</td>
+                  <td [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+                    <button pButton class="p-button-rounded p-button-text p-button-plain p-button-icon-mov" 
+                          icon="pi pi-trash" 
+                          (click)="delete_item_toArrayContact('direccion',dir)">
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      </p-tabPanel>
+      </p-tabView>
+      <div class="d-flex justify-content-end mt-3 mb-2" [ngClass]="(strModalTitle == 'Detalles') ? 'd-none' : ''">
+        <button class="p-button-primary me-2"
+                pButton 
+                pRipple
+                type="button"
+                icon="pi pi-check"
+                label="Ok"
+                (click)="submit(strModalTitle)">
+        </button>
+      </div>
+    </form>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '50vw'}" [baseZIndex]="10000" acceptLabel="Si" rejectButtonStyleClass="p-button-text"></p-confirmDialog>
