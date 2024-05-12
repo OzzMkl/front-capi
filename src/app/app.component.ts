@@ -57,6 +57,10 @@ export class AppComponent implements OnInit {
     this.getContacts();
   }
 
+  /**
+   * @description
+   * Agrega las opciones al menu de la tabla principal de contactos
+   */
   add_optMenu(){
     this.menuItems = [
       {
@@ -90,7 +94,7 @@ export class AppComponent implements OnInit {
 
   /**
  * @description
- * Carga el array a mostrar del dropdown
+ * Carga el array a mostrar del dropdown de busqueda
  */
   setOptionsSelect(){
     this.optionsSelect = [
@@ -104,7 +108,14 @@ export class AppComponent implements OnInit {
     this.selectedOpt = this.optionsSelect[0];
   }
 
+  /**
+   * 
+   * @param motivo 
+   * @description
+   * Abre el modal de acuerdo al tipo de accion
+   */
   open_modal(motivo:string){
+    //Limpiamos modelo
     this.contacto = { 
       nombre:'',
       apellido_paterno:'',
@@ -158,14 +169,31 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * 
+   * @param event 
+   */
   onPageChange(event:any){
     this.getContacts(event.page + 1);
   }
   
+  /**
+   * 
+   * @param contacto 
+   * Selecciona el contacto de la fila al darle click al boton del menu
+   */
   selectedContact(contacto:any){
     this.contacto = contacto;
   }
 
+  /**
+   * 
+   * @param page - Numero de pagina
+   * @param type - Tipo de busqueda 1: nombre 2: telefono, 3: direccion, 4: email
+   * @param search - Valor a buscar por defecto es 'null'
+   * @description
+   * Funcion que trae los resultado del index de contactos, estos datos estan paginados
+   */
   getContacts(page:number = 1, type:number = 0, search:string = 'null'){
     this._contactosService.getContactos(page,type,search).subscribe(
       response =>{
@@ -181,6 +209,10 @@ export class AppComponent implements OnInit {
     )
   }
 
+  /**
+   * @description
+   * Trae informacion detallada del contacto
+   */
   getContact(){
     if(this.contacto && this.contacto.idContacto){
       this._contactosService.getContacto(this.contacto.idContacto).subscribe(
@@ -201,6 +233,12 @@ export class AppComponent implements OnInit {
     
   }
 
+  /**
+   * 
+   * @param motivo 
+   * @description
+   * Envio del formulario para Agregar y Actualizar
+   */
   submit(motivo:string){
     if(this.validateForm(this.contacto) && motivo){
       switch(motivo){
@@ -233,7 +271,14 @@ export class AppComponent implements OnInit {
     }
   }
 
-  validateForm(contacto:contacto){
+  /**
+   * 
+   * @param contacto 
+   * @returns boolean
+   * @description
+   * Validacion del formulario, solo se valida el nombre, apellido paterno y materno
+   */
+  validateForm(contacto:contacto):boolean{
     let isOk = true
     if(contacto.nombre.length < 3){
       isOk = false;
@@ -247,6 +292,12 @@ export class AppComponent implements OnInit {
     return isOk;
   }
 
+  /**
+   * 
+   * @param arrName - string, es la propiedad a agregar el elemento
+   * @description
+   * Agregar un elemento a una propiedad del contacto (telefonos, emails o direcciones)
+   */
   add_item_toArrayContact(arrName:string){
     switch(arrName){
       case 'telefono':
@@ -280,9 +331,17 @@ export class AppComponent implements OnInit {
     
   }
 
+  /**
+   * 
+   * @param arrName 
+   * @param item 
+   * @description
+   * Elimina un elemento a una propiedad del contacto (telefonos, emails o direcciones)
+   */
   delete_item_toArrayContact(arrName:string,item:any){
     switch(arrName){
       case 'telefono':
+          //Creamos una nueva lista de acuerdo al valor seleccionado (se omite)
           this.contacto.telefonos = this.contacto.telefonos?.filter(x => x != item);
         break;
       case 'email':
@@ -294,6 +353,10 @@ export class AppComponent implements OnInit {
       }
   }
 
+  /**
+   * @description
+   * Actualizacion del contacto
+   */
   updateContacto(){
     if(this.contacto && this.contacto.idContacto){
       this._contactosService.putContacto(this.contacto.idContacto, this.contacto).subscribe(
@@ -319,6 +382,10 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * @description
+   * Eliminacion del contacto, muestra mensaje de confirmacion
+   */
   deleteContacto(){
     this._confirmationService.confirm({
       message: '¿Esta seguro(a) de que desea eliminar el contacto?',
